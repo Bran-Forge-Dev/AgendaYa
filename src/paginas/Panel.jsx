@@ -66,7 +66,7 @@ function Panel() {
         return
       }
       if (!negocios?.length) {
-        setEstado('sin_negocio')
+        navegar('/panel/configuracion')
         return
       }
 
@@ -118,15 +118,7 @@ function Panel() {
     return <main className="pagina centrado">No se pudo cargar tu negocio.</main>
   }
   if (estado === 'sin_negocio') {
-    return (
-      <main className="pagina">
-        <h1>Panel del negocio</h1>
-        <p className="subtitulo">Aún no tienes un negocio registrado.</p>
-        <button className="boton-secundario" onClick={salir}>
-          Cerrar sesión
-        </button>
-      </main>
-    )
+    return <main className="pagina centrado">Redirigiendo…</main>
   }
 
   // ----- Calendario del mes visible -----
@@ -156,7 +148,8 @@ function Panel() {
           <h1>{negocio.nombre}</h1>
           <p className="subtitulo">
             {usuario.email} ·{' '}
-            <Link to={`/agendar/${negocio.slug}`}>Ver página pública</Link>
+            <Link to={`/agendar/${negocio.slug}`}>Ver página pública</Link> ·{' '}
+            <Link to="/panel/configuracion">Configuración</Link>
           </p>
         </div>
         <button onClick={salir}>Cerrar sesión</button>

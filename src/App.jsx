@@ -4,6 +4,7 @@ import Agendar from './paginas/Agendar'
 import Ingresar from './paginas/Ingresar'
 import Panel from './paginas/Panel'
 import Cancelar from './paginas/Cancelar'
+import Configuracion from './paginas/Configuracion'
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/cancelar/:token" element={<Cancelar />} />
         <Route path="/ingresar" element={<Ingresar />} />
         <Route path="/panel" element={<Panel />} />
+        <Route path="/panel/configuracion" element={<Configuracion />} />
       </Routes>
     </BrowserRouter>
   )
