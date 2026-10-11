@@ -1,0 +1,4 @@
+# La función es un webhook propio: la autenticación la hace el header
+# x-webhook-secret dentro del código, no el JWT de Supabase.
+[functions.enviar-correo-cita]
+verify_jwt = false

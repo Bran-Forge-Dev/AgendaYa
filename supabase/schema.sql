@@ -5,7 +5,13 @@
 -- reflejarse aquí para que este archivo siempre represente el estado
 -- completo de la base de datos.
 --
--- Contenido actual: migracion-001-esquema-inicial.sql
+-- Contenido actual:
+--   migracion-001-esquema-inicial.sql
+--   migracion-002-aislamiento-apps.sql
+--   migracion-003-vista-cita-publica.sql
+--   migracion-004-cancelada-por.sql
+--   migracion-005-webhook-correo.sql
+--   migracion-006-auth-header-webhook.sql
 -- =====================================================================
 
 -- =====================================================================
@@ -435,3 +441,270 @@ grant execute on function res_negocio_publico(text) to anon, authenticated;
 grant execute on function res_disponibilidad(text, date, uuid) to anon, authenticated;
 grant execute on function res_crear_cita_publica(text, uuid, date, time, text, text, text) to anon, authenticated;
 grant execute on function res_cancelar_cita_publica(uuid) to anon, authenticated;
+
+-- =====================================================================
+-- migracion-002: aislamiento de apps por app_metadata
+-- =====================================================================
+
+create or replace function res_es_usuario_agendaya()
+returns boolean
+language sql
+stable
+set search_path = public
+as $$
+  select coalesce(
+    (auth.jwt() -> 'app_metadata' -> 'apps') ? 'agendaya',
+    false
+  );
+$$;
+
+drop policy res_negocios_propietario on res_negocios;
+create policy res_negocios_propietario on res_negocios
+  for all to authenticated
+  using (propietario_id = auth.uid() and res_es_usuario_agendaya())
+  with check (propietario_id = auth.uid() and res_es_usuario_agendaya());
+
+drop policy res_servicios_propietario on res_servicios;
+create policy res_servicios_propietario on res_servicios
+  for all to authenticated
+  using (
+    res_es_usuario_agendaya()
+    and exists (
+      select 1 from res_negocios n
+      where n.id = negocio_id and n.propietario_id = auth.uid()
+    )
+  )
+  with check (
+    res_es_usuario_agendaya()
+    and exists (
+      select 1 from res_negocios n
+      where n.id = negocio_id and n.propietario_id = auth.uid()
+    )
+  );
+
+drop policy res_horarios_propietario on res_horarios;
+create policy res_horarios_propietario on res_horarios
+  for all to authenticated
+  using (
+    res_es_usuario_agendaya()
+    and exists (
+      select 1 from res_negocios n
+      where n.id = negocio_id and n.propietario_id = auth.uid()
+    )
+  )
+  with check (
+    res_es_usuario_agendaya()
+    and exists (
+      select 1 from res_negocios n
+      where n.id = negocio_id and n.propietario_id = auth.uid()
+    )
+  );
+
+drop policy res_citas_propietario on res_citas;
+create policy res_citas_propietario on res_citas
+  for all to authenticated
+  using (
+    res_es_usuario_agendaya()
+    and exists (
+      select 1 from res_negocios n
+      where n.id = negocio_id and n.propietario_id = auth.uid()
+    )
+  )
+  with check (
+    res_es_usuario_agendaya()
+    and exists (
+      select 1 from res_negocios n
+      where n.id = negocio_id and n.propietario_id = auth.uid()
+    )
+  );
+
+-- =====================================================================
+-- migracion-003: res_cita_publica
+-- =====================================================================
+
+create or replace function res_cita_publica(p_token uuid)
+returns json
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+declare
+  v_negocio  text;
+  v_zona     text;
+  v_servicio text;
+  v_ini      timestamptz;
+  v_estado   res_estado_cita;
+begin
+  select n.nombre, n.zona_horaria, s.nombre, c.inicia_en, c.estado
+    into v_negocio, v_zona, v_servicio, v_ini, v_estado
+  from res_citas c
+  join res_negocios n on n.id = c.negocio_id
+  join res_servicios s on s.id = c.servicio_id
+  where c.token_cancelacion = p_token;
+
+  if not found then
+    return json_build_object('ok', false, 'error', 'no_encontrada');
+  end if;
+
+  return json_build_object(
+    'ok', true,
+    'negocio',       v_negocio,
+    'zona_horaria',  v_zona,
+    'servicio',      v_servicio,
+    'inicia_en',     v_ini,
+    'estado',        v_estado,
+    'cancelable',    (v_estado = 'confirmada' and v_ini > now())
+  );
+end;
+$$;
+
+grant execute on function res_cita_publica(uuid) to anon, authenticated;
+
+-- =====================================================================
+-- migracion-004: cancelada_por
+-- =====================================================================
+
+alter table res_citas
+  add column cancelada_por text
+  check (cancelada_por is null or cancelada_por in ('cliente', 'negocio'));
+
+create or replace function res_cancelar_cita_publica(p_token uuid)
+returns json
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_cita res_citas;
+begin
+  update res_citas
+  set estado = 'cancelada',
+      cancelada_por = 'cliente'
+  where token_cancelacion = p_token
+    and estado = 'confirmada'
+    and inicia_en > now()
+  returning * into v_cita;
+
+  if not found then
+    return json_build_object('ok', false, 'error', 'cita_no_cancelable');
+  end if;
+
+  return json_build_object(
+    'ok', true,
+    'cita_id',   v_cita.id,
+    'inicia_en', v_cita.inicia_en
+  );
+end;
+$$;
+
+grant execute on function res_cancelar_cita_publica(uuid) to anon, authenticated;
+
+-- =====================================================================
+-- migracion-005: webhook de correos vía trigger + pg_net
+-- =====================================================================
+
+create extension if not exists pg_net;
+create extension if not exists supabase_vault;
+
+create or replace function res_notificar_cita()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_url    text;
+  v_secret text;
+begin
+  select decrypted_secret into v_url
+  from vault.decrypted_secrets
+  where name = 'agendaya_webhook_url';
+
+  select decrypted_secret into v_secret
+  from vault.decrypted_secrets
+  where name = 'agendaya_webhook_secret';
+
+  if v_url is null then
+    return null;
+  end if;
+
+  perform net.http_post(
+    url := v_url,
+    body := jsonb_build_object(
+      'type',       TG_OP,
+      'schema',     TG_TABLE_SCHEMA,
+      'table',      TG_TABLE_NAME,
+      'record',     to_jsonb(NEW),
+      'old_record', to_jsonb(OLD)
+    ),
+    headers := jsonb_build_object(
+      'Content-Type',     'application/json',
+      'x-webhook-secret', coalesce(v_secret, '')
+    )
+  );
+
+  return null;
+end;
+$$;
+
+create trigger res_citas_webhook_insert
+after insert on res_citas
+for each row execute function res_notificar_cita();
+
+create trigger res_citas_webhook_cancel
+after update on res_citas
+for each row
+when (NEW.estado = 'cancelada' and OLD.estado is distinct from NEW.estado)
+execute function res_notificar_cita();
+
+-- =====================================================================
+-- migracion-006: Authorization en el webhook
+-- =====================================================================
+
+create or replace function res_notificar_cita()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_url    text;
+  v_secret text;
+  v_key    text;
+begin
+  select decrypted_secret into v_url
+  from vault.decrypted_secrets
+  where name = 'agendaya_webhook_url';
+
+  select decrypted_secret into v_secret
+  from vault.decrypted_secrets
+  where name = 'agendaya_webhook_secret';
+
+  select decrypted_secret into v_key
+  from vault.decrypted_secrets
+  where name = 'agendaya_anon_key';
+
+  if v_url is null then
+    return null;
+  end if;
+
+  perform net.http_post(
+    url := v_url,
+    body := jsonb_build_object(
+      'type',       TG_OP,
+      'schema',     TG_TABLE_SCHEMA,
+      'table',      TG_TABLE_NAME,
+      'record',     to_jsonb(NEW),
+      'old_record', to_jsonb(OLD)
+    ),
+    headers := jsonb_build_object(
+      'Content-Type',     'application/json',
+      'x-webhook-secret', coalesce(v_secret, ''),
+      'Authorization',    'Bearer ' || coalesce(v_key, '')
+    )
+  );
+
+  return null;
+end;
+$$;
