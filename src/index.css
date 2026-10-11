@@ -1,7 +1,19 @@
 :root {
-  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
-  color: #1a1a1a;
-  background: #fafafa;
+  --acento: #4f46e5;
+  --acento-fuerte: #4338ca;
+  --acento-suave: #eef2ff;
+  --fondo: #f5f6fb;
+  --superficie: #ffffff;
+  --texto: #171724;
+  --texto-suave: #6b7280;
+  --borde: #e5e7eb;
+  --ok: #059669;
+  --error: #dc2626;
+  --radio: 0.875rem;
+  --sombra: 0 1px 2px rgb(23 23 36 / 0.06), 0 8px 24px rgb(23 23 36 / 0.06);
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color: var(--texto);
+  background: var(--fondo);
 }
 
 * {
@@ -10,27 +22,560 @@
 
 body {
   margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(60rem 24rem at 50% -10rem, var(--acento-suave), transparent),
+    var(--fondo);
 }
 
 .pagina {
-  max-width: 40rem;
+  max-width: 42rem;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 3rem 1.25rem;
 }
 
-.acciones a {
-  color: #2563eb;
+.pagina.centrado {
+  text-align: center;
+  padding-top: 6rem;
 }
+
+h1 {
+  font-size: 1.75rem;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: 1.125rem;
+  margin: 0 0 1rem;
+}
+
+p {
+  line-height: 1.55;
+}
+
+button {
+  font: inherit;
+}
+
+a {
+  color: var(--acento);
+}
+
+.subtitulo {
+  color: var(--texto-suave);
+  margin: 0.35rem 0 0;
+}
+
+/* ---------- Cabeceras ---------- */
+
+.negocio-cabecera {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.panel-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.panel-cabecera h1 {
+  margin-bottom: 0.25rem;
+}
+
+.pagina section {
+  margin-top: 1.75rem;
+}
+
+/* ---------- Tarjetas ---------- */
+
+.tarjeta {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+  padding: 1.5rem;
+}
+
+.tarjeta-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.tarjeta-cabecera h2 {
+  margin: 0;
+}
+
+.tarjeta.confirmacion {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+}
+
+.palomita {
+  width: 3rem;
+  height: 3rem;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  background: var(--ok);
+  color: #fff;
+  font-size: 1.5rem;
+  line-height: 3rem;
+}
+
+.resumen-chip {
+  display: inline-block;
+  background: var(--acento-suave);
+  color: var(--acento-fuerte);
+  border-radius: 999px;
+  padding: 0.3rem 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 0.5rem 0 1.25rem;
+}
+
+/* ---------- Pasos ---------- */
+
+.pasos {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem;
+}
+
+.pasos li {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--texto-suave);
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+}
+
+.pasos li.activo {
+  color: #fff;
+  background: var(--acento);
+  border-color: var(--acento);
+}
+
+/* ---------- Servicios / slots ---------- */
+
+.grid-servicios {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.opcion-servicio {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  text-align: left;
+  padding: 1rem 1.25rem;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.opcion-servicio:hover {
+  border-color: var(--acento);
+  box-shadow: 0 0 0 3px var(--acento-suave);
+}
+
+.opcion-servicio .nombre {
+  font-weight: 700;
+}
+
+.opcion-servicio .descripcion {
+  color: var(--texto-suave);
+  font-size: 0.875rem;
+}
+
+.opcion-servicio .detalle {
+  color: var(--acento-fuerte);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.chip-slot {
+  padding: 0.6rem 0.25rem;
+  border: 1px solid var(--borde);
+  border-radius: 0.625rem;
+  background: var(--superficie);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.chip-slot:hover {
+  border-color: var(--acento);
+  background: var(--acento);
+  color: #fff;
+}
+
+/* ---------- Formularios ---------- */
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.campo,
+.formulario label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.campo .opcional {
+  font-weight: 400;
+  color: var(--texto-suave);
+}
+
+input {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--borde);
+  border-radius: 0.625rem;
+  font: inherit;
+  background: var(--superficie);
+  color: var(--texto);
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--acento);
+  box-shadow: 0 0 0 3px var(--acento-suave);
+}
+
+button[type='submit'],
+.boton {
+  padding: 0.7rem 1rem;
+  border: none;
+  border-radius: 0.625rem;
+  background: var(--acento);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+button[type='submit']:hover:not(:disabled),
+.boton:hover {
+  background: var(--acento-fuerte);
+}
+
+button[type='submit']:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.enlace {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--acento);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.enlace:hover {
+  text-decoration: underline;
+}
+
+.boton-secundario,
+.panel-cabecera button {
+  padding: 0.45rem 0.85rem;
+  border: 1px solid var(--borde);
+  border-radius: 0.625rem;
+  background: var(--superficie);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.boton-secundario:hover,
+.panel-cabecera button:hover {
+  border-color: var(--texto-suave);
+}
+
+.error {
+  color: var(--error);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* ---------- Listas del panel ---------- */
 
 .lista-servicios {
   list-style: none;
   padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.6rem;
 }
 
 .lista-servicios li {
-  padding: 0.75rem 1rem;
-  margin-bottom: 0.5rem;
-  background: #fff;
-  border: 1px solid #e5e5e5;
+  padding: 0.85rem 1.1rem;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+}
+
+.acciones {
+  margin-top: 1.5rem;
+}
+
+.acciones a {
+  display: inline-block;
+  background: var(--acento);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.7rem 1.4rem;
+  border-radius: 0.625rem;
+}
+
+/* ---------- Enlace público + QR ---------- */
+
+.enlace-publico {
+  margin-top: 1.5rem;
+}
+
+.enlace-fila {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  margin-top: 0.75rem;
+}
+
+.enlace-url {
+  flex: 1;
+  background: var(--fondo);
+  border: 1px solid var(--borde);
+  border-radius: 0.625rem;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qr-bloque {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.qr-bloque img {
+  border: 1px solid var(--borde);
+  border-radius: 0.625rem;
+}
+
+/* ---------- Panel: layout ---------- */
+
+.pagina-panel {
+  max-width: 56rem;
+}
+
+.panel-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 720px) {
+  .panel-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Calendario ---------- */
+
+.calendario .nav-mes {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 1rem;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.2rem;
+  text-align: center;
+}
+
+.cal-dow {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--texto-suave);
+  padding: 0.35rem 0;
+}
+
+.cal-dia {
+  position: relative;
+  aspect-ratio: 1;
+  border: none;
   border-radius: 0.5rem;
+  background: transparent;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--texto);
+}
+
+.cal-dia:hover {
+  background: var(--acento-suave);
+}
+
+.cal-dia.hoy {
+  outline: 1px solid var(--acento);
+}
+
+.cal-dia.sel {
+  background: var(--acento);
+  color: #fff;
+}
+
+.cal-dia .punto {
+  position: absolute;
+  bottom: 0.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0.3rem;
+  height: 0.3rem;
+  border-radius: 50%;
+  background: var(--acento);
+}
+
+.cal-dia.sel .punto {
+  background: #fff;
+}
+
+/* ---------- Citas del día ---------- */
+
+.cita {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cita-acciones {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.estado {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+}
+
+.estado-confirmada {
+  background: #ecfdf5;
+  color: var(--ok);
+}
+
+.estado-cancelada {
+  background: #fef2f2;
+  color: var(--error);
+}
+
+.estado-completada {
+  background: var(--acento-suave);
+  color: var(--acento-fuerte);
+}
+
+.estado-no_asistio {
+  background: #fefce8;
+  color: #a16207;
+}
+
+.enlace.peligro {
+  color: var(--error);
+}
+
+/* ---------- Modal ---------- */
+
+.modal-fondo {
+  position: fixed;
+  inset: 0;
+  background: rgb(23 23 36 / 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 50;
+}
+
+.modal {
+  background: var(--superficie);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+  padding: 1.5rem;
+  max-width: 24rem;
+  width: 100%;
+}
+
+.modal h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+}
+
+.modal-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+}
+
+.boton-peligro {
+  padding: 0.55rem 1rem;
+  border: none;
+  border-radius: 0.625rem;
+  background: var(--error);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.boton-peligro:disabled {
+  opacity: 0.6;
+}
+
+.boton-bloque {
+  display: block;
+  width: 100%;
+  padding: 0.7rem 1rem;
 }

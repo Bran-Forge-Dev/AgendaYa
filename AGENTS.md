@@ -11,7 +11,10 @@ server-side con anti-spam.
 - **Tiempo real**: Supabase Realtime sobre `res_ocupacion` (espejo público
   sin PII de `res_citas`)
 - **Correos**: Resend vía Edge Function `enviar-correo-cita`
-  (`supabase/functions/`), disparada por Database Webhook en `res_citas`
+  (`supabase/functions/`), disparada por trigger `res_notificar_cita` +
+  `pg_net` en `res_citas` (INSERT y UPDATE→cancelada). URL y secreto del
+  webhook viven en Supabase Vault (`agendaya_webhook_url`,
+  `agendaya_webhook_secret`), nunca en el repo.
 
 ## Convenciones (heredadas de NeoVenta)
 
@@ -32,8 +35,27 @@ server-side con anti-spam.
 
 | Actor | Acceso |
 |---|---|
-| `anon` (público) | Solo RPCs `res_negocio_publico`, `res_disponibilidad`, `res_crear_cita_publica`, `res_cancelar_cita_publica` + SELECT en `res_ocupacion` (Realtime). **Nunca** toca `res_citas` (PII). |
+| `anon` (público) | Solo RPCs `res_negocio_publico`, `res_disponibilidad`, `res_crear_cita_publica`, `res_cita_publica`, `res_cancelar_cita_publica` + SELECT en `res_ocupacion` (Realtime). **Nunca** toca `res_citas` (PII). |
 | `authenticated` (dueño) | CRUD completo de sus `res_*` vía RLS (`propietario_id = auth.uid()`). |
+
+## Aislamiento entre apps (mismo proyecto que NeoVenta)
+
+`auth.users` es un pool compartido: un JWT válido no se puede impedir,
+pero el acceso sí. Cada usuario lleva `app_metadata.apps` (array, solo
+editable con service_role) y las políticas `res_*` exigen
+`res_es_usuario_agendaya()` → tag `'agendaya'` en el JWT. Un usuario de
+NeoVenta con sesión válida tiene acceso NULO a `res_*` y el login lo
+expulsa. El frontend verifica el mismo tag con
+`src/lib/sesion.js → tieneAccesoAgendaya()`.
+
+Etiquetar un usuario (SQL Editor):
+
+```sql
+update auth.users
+set raw_app_meta_data =
+  raw_app_meta_data || '{"apps": ["agendaya"]}'::jsonb
+where email = 'dueno@ejemplo.com';
+```
 
 Anti-doble-reserva: constraint `EXCLUDE USING gist` sobre
 `(negocio_id, tstzrange)` con `WHERE estado = 'confirmada'` — la carrera
