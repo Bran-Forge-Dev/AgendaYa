@@ -15,7 +15,7 @@ const NEGOCIO_VACIO = {
   zona_horaria: 'America/Mexico_City',
   intervalo_minutos: 15,
 }
-const SERVICIO_VACIO = { nombre: '', duracion_minutos: 30, precio: '' }
+const SERVICIO_VACIO = { nombre: '', duracion_minutos: '', precio: '' }
 const HORARIO_VACIO = { dia_semana: 1, hora_inicio: '09:00', hora_fin: '18:00' }
 
 function Configuracion() {
@@ -318,6 +318,7 @@ function Configuracion() {
                 type="number"
                 min="5"
                 title="Duración en minutos"
+                placeholder="Minutos"
                 value={formServ.duracion_minutos}
                 onChange={(e) =>
                   setFormServ({

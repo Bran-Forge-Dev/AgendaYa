@@ -314,9 +314,24 @@ button[type='submit']:disabled {
   cursor: pointer;
 }
 
+a.boton-secundario {
+  display: inline-block;
+  text-decoration: none;
+  color: var(--texto);
+}
+
 .boton-secundario:hover,
-.panel-cabecera button:hover {
-  border-color: var(--texto-suave);
+.panel-cabecera button:hover,
+a.boton-secundario:hover {
+  border-color: var(--acento);
+  color: var(--acento-fuerte);
+  background: var(--acento-suave);
+}
+
+.panel-acciones {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
 }
 
 .error {

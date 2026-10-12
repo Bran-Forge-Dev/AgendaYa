@@ -146,11 +146,15 @@ function Panel() {
       <header className="panel-cabecera">
         <div>
           <h1>{negocio.nombre}</h1>
-          <p className="subtitulo">
-            {usuario.email} ·{' '}
-            <Link to={`/agendar/${negocio.slug}`}>Ver página pública</Link> ·{' '}
-            <Link to="/panel/configuracion">Configuración</Link>
-          </p>
+          <p className="subtitulo">Sesión: {usuario.email}</p>
+          <div className="panel-acciones">
+            <Link className="boton-secundario" to={`/agendar/${negocio.slug}`}>
+              Ver página pública
+            </Link>
+            <Link className="boton-secundario" to="/panel/configuracion">
+              Configuración
+            </Link>
+          </div>
         </div>
         <button onClick={salir}>Cerrar sesión</button>
       </header>
