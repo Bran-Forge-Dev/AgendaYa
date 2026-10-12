@@ -47,7 +47,7 @@ function Planes() {
           <a
             className="cta-secundario"
             href={enlaceWhatsApp(
-              'Hola, quiero más información sobre el plan AgendaYa'
+              'Hola! Me interesa AgendaYa para mi negocio. ¿Me podrías dar más información?'
             )}
             target="_blank"
             rel="noreferrer"
@@ -57,7 +57,7 @@ function Planes() {
           <a
             className="cta-primario"
             href={enlaceWhatsApp(
-              'Hola, quiero activar mi licencia de AgendaYa'
+              'Hola! Quiero activar mi licencia de AgendaYa. - Nombre del negocio: [ESCRIBE AQUÍ] - Correo para mi cuenta: [ESCRIBE AQUÍ] ¿Me compartes la CLABE para hacer la transferencia?'
             )}
             target="_blank"
             rel="noreferrer"
