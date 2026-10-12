@@ -80,6 +80,49 @@ Deno.serve(async (req) => {
 
   const { type, record, old_record } = await req.json()
 
+  // --- Recordatorio ~24h antes (invocado por pg_cron) ---
+  if (type === 'recordatorio') {
+    const desde = new Date(Date.now() + 23 * 3600e3).toISOString()
+    const hasta = new Date(Date.now() + 24 * 3600e3).toISOString()
+
+    const { data: citas } = await supabase
+      .from('res_citas')
+      .select('*, res_negocios(nombre, zona_horaria), res_servicios(nombre)')
+      .eq('estado', 'confirmada')
+      .eq('recordatorio_enviado', false)
+      .not('cliente_correo', 'is', null)
+      .gt('inicia_en', desde)
+      .lte('inicia_en', hasta)
+
+    let enviados = 0
+    for (const cita of citas ?? []) {
+      const fecha = formatoFecha(
+        cita.inicia_en,
+        cita.res_negocios.zona_horaria
+      )
+      const ligaCancelar = `${APP_URL}/cancelar/${cita.token_cancelacion}`
+      const resultado = await enviarCorreo(
+        cita.cliente_correo,
+        `Recordatorio: tu cita en ${cita.res_negocios.nombre} es mañana`,
+        `
+          <h2>Recordatorio de tu cita</h2>
+          <p><strong>${cita.res_negocios.nombre}</strong> — ${cita.res_servicios?.nombre}</p>
+          <p>${fecha}</p>
+          <p>Si no puedes asistir, cancela aquí:
+             <a href="${ligaCancelar}">${ligaCancelar}</a></p>
+        `
+      )
+      if (resultado.ok) {
+        await supabase
+          .from('res_citas')
+          .update({ recordatorio_enviado: true })
+          .eq('id', cita.id)
+        enviados++
+      }
+    }
+    return Response.json({ ok: true, enviados })
+  }
+
   // --- Cita nueva: confirmación al cliente ---
   if (type === 'INSERT') {
     if (!record?.cliente_correo) {

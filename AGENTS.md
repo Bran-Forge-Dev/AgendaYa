@@ -15,6 +15,9 @@ server-side con anti-spam.
   `pg_net` en `res_citas` (INSERT y UPDATE→cancelada). URL y secreto del
   webhook viven en Supabase Vault (`agendaya_webhook_url`,
   `agendaya_webhook_secret`), nunca en el repo.
+  Recordatorios ~24h antes: `pg_cron` (job `agendaya-recordatorios`,
+  cada 30 min) → `res_enviar_recordatorios` → misma Edge Function con
+  `type: 'recordatorio'`; flag `res_citas.recordatorio_enviado`.
 
 ## Convenciones (heredadas de NeoVenta)
 
