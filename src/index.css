@@ -382,6 +382,17 @@ a.boton-secundario:hover {
   background: var(--superficie);
 }
 
+.aviso-warn {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #a16207;
+  background: #fefce8;
+  border: 1px solid #fde68a;
+  border-radius: 0.5rem;
+  padding: 0.45rem 0.65rem;
+  margin-top: 0.4rem;
+}
+
 .aviso-ok {
   background: #ecfdf5;
   color: var(--ok);

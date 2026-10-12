@@ -217,6 +217,12 @@ function Configuracion() {
                 }
                 placeholder="barberia-el-norte"
               />
+              {negocio && formNeg.slug !== negocio.slug && (
+                <span className="aviso-warn">
+                  Ojo: al cambiar el slug tu link público cambia y los enlaces
+                  o QR que ya compartiste dejarán de funcionar.
+                </span>
+              )}
             </label>
           </div>
           <div className="fila-3">
