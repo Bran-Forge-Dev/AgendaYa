@@ -1,0 +1,61 @@
+import { Link } from 'react-router-dom'
+
+// Correo al que llegan las solicitudes de información/licencia.
+const CONTACTO = 'hola@branforgedev.com'
+
+const FEATURES = [
+  'Página pública de reservas con tu link y QR',
+  'Horarios disponibles en vivo, sin dobles citas',
+  'Clientes agendan sin crear cuenta',
+  'Confirmación, recordatorio y cancelación por correo',
+  'Panel con calendario y citas del día',
+  'Servicios y horarios configurables',
+]
+
+function Planes() {
+  return (
+    <main className="landing">
+      <section className="hero">
+        <h1 className="logo-marca">
+          Agenda<span>Ya</span>
+        </h1>
+        <p className="hero-tagline">
+          La agenda inteligente para tu negocio
+        </p>
+      </section>
+
+      <section className="plan-card">
+        <div className="plan-info">
+          <h2>Plan AgendaYa</h2>
+          <ul className="lista-features">
+            {FEATURES.map((f) => (
+              <li key={f}>{f}</li>
+            ))}
+          </ul>
+        </div>
+        <div className="plan-precio">
+          <span className="precio-etiqueta">Inversión mensual</span>
+          <span className="precio">
+            $199<small>/MXN</small>
+          </span>
+          <span className="precio-nota">Sin plazos forzosos</span>
+          <a className="cta-secundario" href={`mailto:${CONTACTO}`}>
+            Quiero más información
+          </a>
+          <a
+            className="cta-primario"
+            href={`mailto:${CONTACTO}?subject=Activar%20licencia%20AgendaYa`}
+          >
+            Activar mi licencia
+          </a>
+        </div>
+      </section>
+
+      <p className="landing-footer">
+        ¿Ya tienes cuenta? <Link to="/ingresar">Inicia sesión aquí</Link>
+      </p>
+    </main>
+  )
+}
+
+export default Planes

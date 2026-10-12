@@ -5,12 +5,14 @@ import Ingresar from './paginas/Ingresar'
 import Panel from './paginas/Panel'
 import Cancelar from './paginas/Cancelar'
 import Configuracion from './paginas/Configuracion'
+import Planes from './paginas/Planes'
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Inicio />} />
+        <Route path="/planes" element={<Planes />} />
         <Route path="/agendar/:slug" element={<Agendar />} />
         <Route path="/cancelar/:token" element={<Cancelar />} />
         <Route path="/ingresar" element={<Ingresar />} />
