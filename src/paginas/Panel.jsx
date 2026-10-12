@@ -23,6 +23,7 @@ function Panel() {
 
   const [mes, setMes] = useState('') // 'YYYY-MM' del negocio
   const [hoy, setHoy] = useState('')
+  const [ahora, setAhora] = useState('')
   const [diaSel, setDiaSel] = useState('') // 'YYYY-MM-DD'
   const [citasMes, setCitasMes] = useState([])
   const [cancelando, setCancelando] = useState(null)
@@ -73,10 +74,9 @@ function Panel() {
       const neg = negocios[0]
       setNegocio(neg)
 
-      const fHoy = fechaHoraEnZona(
-        new Date().toISOString(),
-        neg.zona_horaria
-      ).fecha
+      const ahoraIso = new Date().toISOString()
+      setAhora(ahoraIso)
+      const fHoy = fechaHoraEnZona(ahoraIso, neg.zona_horaria).fecha
       setHoy(fHoy)
       setDiaSel(fHoy)
       const mesIni = fHoy.slice(0, 7)
@@ -103,6 +103,14 @@ function Panel() {
       .eq('id', cancelando.id)
     setCancelando(null)
     setOcupadoModal(false)
+    cargarCitas(negocio.id, mes)
+  }
+
+  async function marcarEstado(cita, nuevoEstado) {
+    await supabase
+      .from('res_citas')
+      .update({ estado: nuevoEstado })
+      .eq('id', cita.id)
     cargarCitas(negocio.id, mes)
   }
 
@@ -244,12 +252,31 @@ function Panel() {
                       {c.estado.replace('_', ' ')}
                     </span>
                     {c.estado === 'confirmada' && (
-                      <button
-                        className="enlace peligro"
-                        onClick={() => setCancelando(c)}
-                      >
-                        Cancelar
-                      </button>
+                      <>
+                        {new Date(c.inicia_en).getTime() <=
+                          new Date(ahora).getTime() && (
+                          <>
+                            <button
+                              className="enlace"
+                              onClick={() => marcarEstado(c, 'completada')}
+                            >
+                              Completada
+                            </button>
+                            <button
+                              className="enlace"
+                              onClick={() => marcarEstado(c, 'no_asistio')}
+                            >
+                              No asistió
+                            </button>
+                          </>
+                        )}
+                        <button
+                          className="enlace peligro"
+                          onClick={() => setCancelando(c)}
+                        >
+                          Cancelar
+                        </button>
+                      </>
                     )}
                   </div>
                 </li>
