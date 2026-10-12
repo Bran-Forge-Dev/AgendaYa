@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
 
-// Correo al que llegan las solicitudes de información/licencia.
-const CONTACTO = 'hola@branforgedev.com'
+// Canal de ventas: WhatsApp. Soporte: correo (footer).
+const WHATSAPP = '528137385521'
+const SOPORTE = 'hola@branforgedev.com'
 
 const FEATURES = [
   'Página pública de reservas con tu link y QR',
@@ -11,6 +12,10 @@ const FEATURES = [
   'Panel con calendario y citas del día',
   'Servicios y horarios configurables',
 ]
+
+function enlaceWhatsApp(mensaje) {
+  return `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(mensaje)}`
+}
 
 function Planes() {
   return (
@@ -39,12 +44,23 @@ function Planes() {
             $199<small>/MXN</small>
           </span>
           <span className="precio-nota">Sin plazos forzosos</span>
-          <a className="cta-secundario" href={`mailto:${CONTACTO}`}>
+          <a
+            className="cta-secundario"
+            href={enlaceWhatsApp(
+              'Hola, quiero más información sobre el plan AgendaYa'
+            )}
+            target="_blank"
+            rel="noreferrer"
+          >
             Quiero más información
           </a>
           <a
             className="cta-primario"
-            href={`mailto:${CONTACTO}?subject=Activar%20licencia%20AgendaYa`}
+            href={enlaceWhatsApp(
+              'Hola, quiero activar mi licencia de AgendaYa'
+            )}
+            target="_blank"
+            rel="noreferrer"
           >
             Activar mi licencia
           </a>
@@ -53,6 +69,8 @@ function Planes() {
 
       <p className="landing-footer">
         ¿Ya tienes cuenta? <Link to="/ingresar">Inicia sesión aquí</Link>
+        <br />
+        Soporte: <a href={`mailto:${SOPORTE}`}>{SOPORTE}</a>
       </p>
     </main>
   )
